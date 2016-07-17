@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Next Word Prediction Demo</title>
+  <meta charset="utf-8">
+  <meta name="description" content="Next Word Prediction Demo">
+  <meta name="author" content="Francesca Iannuzzi">
+  <meta name="generator" content="slidify" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta http-equiv="X-UA-Compatible" content="chrome=1">
+  <link rel="stylesheet" href="libraries/frameworks/io2012/css/default.css" media="all" >
+  <link rel="stylesheet" href="libraries/frameworks/io2012/css/phone.css" 
+    media="only screen and (max-device-width: 480px)" >
+  <link rel="stylesheet" href="libraries/frameworks/io2012/css/slidify.css" >
+  <link rel="stylesheet" href="libraries/highlighters/highlight.js/css/tomorrow.css" />
+  <base target="_blank"> <!-- This amazingness opens all links in a new tab. -->  <link rel=stylesheet href="./assets/css/ribbons.css"></link>
+
+  
+  <!-- Grab CDN jQuery, fall back to local if offline -->
+  <script src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.7.min.js"></script>
+  <script>window.jQuery || document.write('<script src="libraries/widgets/quiz/js/jquery.js"><\/script>')</script> 
+  <script data-main="libraries/frameworks/io2012/js/slides" 
+    src="libraries/frameworks/io2012/js/require-1.0.8.min.js">
+  </script>
+  
+  
+
+</head>
+<body style="opacity: 0">
+  <slides class="layout-widescreen">
+    
+    <!-- LOGO SLIDE -->
+        <slide class="title-slide segue nobackground">
+  <hgroup class="auto-fadein">
+    <h1>Next Word Prediction Demo</h1>
+    <h2>Introduction to the product and access to beta version</h2>
+    <p>Francesca Iannuzzi<br/></p>
+  </hgroup>
+  <article></article>  
+</slide>
+    
+
+    <!-- SLIDES -->
+    <slide class="" id="slide-1" style="background:;">
+  <hgroup>
+    <h2>Next-Word Prediction</h2>
+  </hgroup>
+  <article data-timings="">
+    <p>The idea is to guess the next word of a sentence (as in smartphones&#39; messaging apps)</p>
+
+<p>The starting point is a <strong>Language Model</strong> - typically a set of words and expressions with associated probabilities based on the number of their occurrence in an input corpus.</p>
+
+<p>These expressions are called <strong>n-grams</strong>: for example, <em>Alice-saw-the</em> and <em>saw-the-rabbit</em> are the two 3-grams that can be extracted from the sentence &quot;Alice saw the rabbit&quot;</p>
+
+<p>The higher <em>n</em>, the more sophisticated the language model (if is is based on enough data)</p>
+
+<p>Such an n-gram model predicts what word is likely to follow n-1 words given in input. Following the example above, a 3-gram model is likely to predict <em>the</em> to be the word following &quot;Alice saw&quot;</p>
+
+<p>In what follows I will show a self-made prototype of a next-word predictor</p>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="class" id="id" style="background:;">
+  <hgroup>
+    <h2>My Model</h2>
+  </hgroup>
+  <article data-timings="">
+    <p>The current version employs a <strong>3-gram</strong> model </p>
+
+<p>The input corpus consists of <strong>75 000</strong> English text units, evenly divided into tweets, blog posts and news articles</p>
+
+<p>This results into: <strong>1,6 M trigrams</strong>, <strong>820 k bigrams</strong>, <strong>76 k unigrams</strong> (after removing units consisting of less than 2 words and n-grams containing non-English or repeated characters)</p>
+
+<p>Building the model took <strong>105 s</strong> and <strong>1.6 Gb</strong> of memory on an <em>c4.4xlarge</em> AWS instance running Ubuntu</p>
+
+<p>The result is a set of 3-grams and 2-grams Maximum Likelihood Estimates (say &quot;probabilities&quot;) </p>
+
+<p>The 2-grams are useful in case a prediction based on the 3-grams is not possible - typically when the n-1 (2, in this case) words given as input by the user are unknown to the model; in these cases I consider the last typed word only and look for a prediction in the 2-gram model. This way of dealing with unseen combinations of words is referred to as <strong>stupid backoff</strong></p>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="" id="slide-3" style="background:;">
+  <hgroup>
+    <h2>My Model: how good is it?</h2>
+  </hgroup>
+  <article data-timings="">
+    <p>A first approach at evaluating the quality of the language model is to compute its <em>Perplexity</em></p>
+
+<p>This is a measure of the probability of an unseen test set, normalised by the number of words this consists of. Ideally you would want a model that assigns a high probability to the n-grams extracted from the test set, or in other words a model with a <em>low perplexity</em></p>
+
+<p>On an unseen test set of <em>20 000</em> units the 3-gram model shows a <strong>perplexity of 25</strong> on the known 3-grams (70% of the total)</p>
+
+<p>The result is encouraging, given the reference value of 247 for the 3-gram model evaluated on the Brown Corpus (1992)</p>
+
+<p>However, it does not take into account 30% of the test-set 3-grams (those which are unknown to the model)</p>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="" id="slide-4" style="background:;">
+  <hgroup>
+    <h2>My Model: how can I improve it?</h2>
+  </hgroup>
+  <article data-timings="">
+    <p>Given the little wallclock time needed for training this model, the use of considerably <strong>larger corpora</strong> is feasible immediately (I kept the model small to avoid overcharging the Shiny Demo). Some actions to limit the <strong>memory use</strong> may be desirable</p>
+
+<p>As the corpus increases in size, I may consider to incorporate <strong>4-grams</strong> and so on</p>
+
+<p>A <strong>smoothing method</strong> needs to be introduced to account for unseen n-grams when evaluating the model (as in perplexity calculations). A Good-Turing method in currently in the test phase; it needs to be coupled to a <strong>finer backoff</strong> approach (e.g. Katz) before the results can be seen at the prediction phase</p>
+
+<p>Perplexity does not tell how good the model is in practice and some <strong>task-based evaluation</strong> is needed to compare the performance of different models</p>
+
+<p>Finally, <strong>access to the model</strong> at the prediction phase needs to be optimised before more sophisticated / larger models can be deployed in practice in a web application or similar</p>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="" id="slide-5" style="background:;">
+  <hgroup>
+    <h2>Recap</h2>
+  </hgroup>
+  <article data-timings="">
+    <ul>
+<li><p>I have set up a Shiny app that performs next-word prediction on user-provided input (you can find it <a href="https://fiannuzzi.shinyapps.io/Shiny/">here</a>)</p></li>
+<li><p>The app currently runs a reduced language model intended as a demo / prototype</p></li>
+<li><p>Building considerably more extended models is feasible computationally</p></li>
+<li><p>An upgrade of the smoothing and backoff algorithms is to be prioritized over the size of the training corpus</p></li>
+</ul>
+
+<style>
+em {
+  font-style: italic
+}
+</style>
+
+<style>
+strong {
+  font-weight: bold;
+}
+</style>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+    <slide class="backdrop"></slide>
+  </slides>
+  <div class="pagination pagination-small" id='io2012-ptoc' style="display:none;">
+    <ul>
+      <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=1 title='Next-Word Prediction'>
+         1
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=2 title='My Model'>
+         2
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=3 title='My Model: how good is it?'>
+         3
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=4 title='My Model: how can I improve it?'>
+         4
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=5 title='Recap'>
+         5
+      </a>
+    </li>
+  </ul>
+  </div>  <!--[if IE]>
+    <script 
+      src="http://ajax.googleapis.com/ajax/libs/chrome-frame/1/CFInstall.min.js">  
+    </script>
+    <script>CFInstall.check({mode: 'overlay'});</script>
+  <![endif]-->
+</body>
+  <!-- Load Javascripts for Widgets -->
+  
+  <script src="shared/shiny.js" type="text/javascript"></script>
+  <script src="shared/slider/js/jquery.slider.min.js"></script>
+  <script src="shared/bootstrap/js/bootstrap.min.js"></script>
+  <link rel="stylesheet" href="shared/slider/css/jquery.slider.min.css"></link>
+  
+  <!-- LOAD HIGHLIGHTER JS FILES -->
+  <script src="libraries/highlighters/highlight.js/highlight.pack.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script>
+  <!-- DONE LOADING HIGHLIGHTER JS FILES -->
+   
+  </html>
