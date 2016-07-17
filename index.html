@@ -52,7 +52,7 @@
 
 <p>These expressions are called <strong>n-grams</strong>: for example, <em>Alice-saw-the</em> and <em>saw-the-rabbit</em> are the two 3-grams that can be extracted from the sentence &quot;Alice saw the rabbit&quot;</p>
 
-<p>The higher <em>n</em>, the more sophisticated the language model (if is is based on enough data)</p>
+<p>The higher <em>n</em>, the more sophisticated the language model (if it is based on enough data)</p>
 
 <p>Such an n-gram model predicts what word is likely to follow n-1 words given in input. Following the example above, a 3-gram model is likely to predict <em>the</em> to be the word following &quot;Alice saw&quot;</p>
 
@@ -111,7 +111,7 @@
 
 <p>As the corpus increases in size, I may consider to incorporate <strong>4-grams</strong> and so on</p>
 
-<p>A <strong>smoothing method</strong> needs to be introduced to account for unseen n-grams when evaluating the model (as in perplexity calculations). A Good-Turing method in currently in the test phase; it needs to be coupled to a <strong>finer backoff</strong> approach (e.g. Katz) before the results can be seen at the prediction phase</p>
+<p>A <strong>smoothing method</strong> needs to be introduced to account for unseen n-grams when evaluating the model (as in perplexity calculations). A Good-Turing method is currently in the test phase; it needs to be coupled to a <strong>finer backoff</strong> approach (e.g. Katz) before the results can be seen at the prediction phase</p>
 
 <p>Perplexity does not tell how good the model is in practice and some <strong>task-based evaluation</strong> is needed to compare the performance of different models</p>
 

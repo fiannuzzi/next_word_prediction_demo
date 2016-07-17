@@ -19,7 +19,7 @@ The starting point is a **Language Model** - typically a set of words and expres
 
 These expressions are called **n-grams**: for example, *Alice-saw-the* and *saw-the-rabbit* are the two 3-grams that can be extracted from the sentence "Alice saw the rabbit"
 
-The higher *n*, the more sophisticated the language model (if is is based on enough data)
+The higher *n*, the more sophisticated the language model (if it is based on enough data)
 
 Such an n-gram model predicts what word is likely to follow n-1 words given in input. Following the example above, a 3-gram model is likely to predict *the* to be the word following "Alice saw"
 
@@ -63,7 +63,7 @@ Given the little wallclock time needed for training this model, the use of consi
 
 As the corpus increases in size, I may consider to incorporate **4-grams** and so on
 
-A **smoothing method** needs to be introduced to account for unseen n-grams when evaluating the model (as in perplexity calculations). A Good-Turing method in currently in the test phase; it needs to be coupled to a **finer backoff** approach (e.g. Katz) before the results can be seen at the prediction phase
+A **smoothing method** needs to be introduced to account for unseen n-grams when evaluating the model (as in perplexity calculations). A Good-Turing method is currently in the test phase; it needs to be coupled to a **finer backoff** approach (e.g. Katz) before the results can be seen at the prediction phase
 
 Perplexity does not tell how good the model is in practice and some **task-based evaluation** is needed to compare the performance of different models
 
